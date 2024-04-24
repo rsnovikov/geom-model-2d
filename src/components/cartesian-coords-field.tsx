@@ -1,18 +1,17 @@
 import { Input, InputRef } from "antd";
-import { FC, useEffect, useRef } from "react";
+import { FC, JSX, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { layoutModel } from "../models/layout.model";
 
 /**
- * CoordsField
+ * CartesianCoordsField
  * @returns {JSX.Element}
  */
-export const CoordsField: FC = observer(() => {
+export const CartesianCoordsField: FC = observer(() => {
   const ref = useRef<InputRef>(null);
 
   useEffect(() => {
     ref.current?.focus();
-    console.log("mount");
   }, []);
 
   const onEnter = () => {

@@ -1,4 +1,5 @@
 import { Container, Graphics } from "pixi.js";
+import { BASE_LINE_WIDTH, LineTypes } from "../models/constants";
 
 export interface Position {
   x1: number;
@@ -8,18 +9,29 @@ export interface Position {
 }
 
 export class Line {
-  private x1: number;
-  private y1: number;
+  public x1: number;
+  public y1: number;
   private x2: number;
   private y2: number;
+  private width: number;
+  private lineType: LineTypes;
 
   private graphics: Graphics;
 
-  constructor({ x1, y1, x2 = x1, y2 = y1 }: Position) {
+  constructor({
+    x1,
+    y1,
+    x2 = x1,
+    y2 = y1,
+    width,
+    lineType,
+  }: Position & { width: number; lineType: LineTypes }) {
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
     this.y2 = y2;
+    this.width = width * BASE_LINE_WIDTH;
+    this.lineType = lineType;
 
     this.graphics = new Graphics();
   }
@@ -30,10 +42,20 @@ export class Line {
     }
     this.graphics.clear();
 
-    this.graphics
-      .moveTo(this.x1, this.y1)
-      .lineTo(this.x2, this.y2)
-      .stroke({ width: 2, color: "#A9ADAF" });
+    switch (this.lineType) {
+      case LineTypes.SOLID: {
+        this.graphics.moveTo(this.x1, this.y1).lineTo(this.x2, this.y2);
+        break;
+      }
+      case LineTypes.DOTTED: {
+        break;
+      }
+      case LineTypes.STREAK_DOTTED: {
+        break;
+      }
+    }
+
+    this.graphics.stroke({ width: this.width, color: "#A9ADAF" });
   }
 
   appendTo(container: Container) {
@@ -43,6 +65,16 @@ export class Line {
   setPosition(x2: number, y2: number) {
     this.x2 = x2;
     this.y2 = y2;
+    this.render();
+  }
+
+  setWidth(value: number) {
+    this.width = value * BASE_LINE_WIDTH;
+    this.render();
+  }
+
+  setLineType(value: LineTypes) {
+    this.lineType = value;
     this.render();
   }
 

@@ -1,22 +1,22 @@
 import { action, observable } from "mobx";
 import { Application, FederatedPointerEvent, Graphics } from "pixi.js";
 import { Line } from "../elements/line";
-
-export enum LineTypes {
-  SOLID = "SOLID",
-  DOTTED = "DOTTED",
-}
+import { degreeToRadian } from "../utils/degree-to-radian";
+import { CoordSystemTypes, LineTypes, MIN_LINE_WIDTH } from "./constants";
 
 class LayoutModel {
   @observable accessor selectedLineType: LineTypes = LineTypes.SOLID;
   @observable accessor isDrawing: boolean = false;
+  // TODO: make private
+  @observable accessor drawingLine: Line | null = null;
+  @observable accessor drawingCoordSystem: CoordSystemTypes =
+    CoordSystemTypes.CARTESIAN;
+  @observable accessor drawingLineWidth: number = MIN_LINE_WIDTH;
 
   private app: Application;
   private elementList: Line[] = [];
   private centerX: number = 0;
   private centerY: number = 0;
-  // TODO: make private
-  @observable accessor drawingLine: Line | null = null;
 
   constructor() {
     this.app = new Application();
@@ -38,6 +38,7 @@ class LayoutModel {
       this.drawingLine?.destroy();
       this.setDrawingLine(null);
       this.setIsDrawing(false);
+      return;
     }
   }
 
@@ -59,8 +60,27 @@ class LayoutModel {
     }
   }
 
+  onEnterPolar(length: number, degree: number) {
+    if (!this.drawingLine || Number.isNaN(length) || Number.isNaN(degree)) {
+      return;
+    }
+    const x = length * Math.cos(degreeToRadian(degree));
+    const y = length * Math.sin(degreeToRadian(degree));
+
+    this.drawingLine.setPosition(
+      this.drawingLine.x1 + x,
+      this.drawingLine.y1 - y
+    );
+    this.completeDrawLine();
+  }
+
   private startDrawLine(x1: number, y1: number) {
-    const line = new Line({ x1: x1, y1: y1 });
+    const line = new Line({
+      x1: x1,
+      y1: y1,
+      width: this.drawingLineWidth,
+      lineType: this.selectedLineType,
+    });
     this.setDrawingLine(line);
     line.appendTo(this.app.stage);
   }
@@ -98,6 +118,10 @@ class LayoutModel {
     this.renderCenter();
   }
 
+  destroy() {
+    this.app.destroy();
+  }
+
   private transformPos(x?: number, y?: number) {
     return {
       x: this.centerX + (x ?? 0),
@@ -130,6 +154,7 @@ class LayoutModel {
   @action
   setSelectedLineType(lineType: LineTypes) {
     this.selectedLineType = lineType;
+    this.drawingLine?.setLineType(lineType);
   }
 
   @action
@@ -140,6 +165,17 @@ class LayoutModel {
   @action
   setDrawingLine(value: Line | null) {
     this.drawingLine = value;
+  }
+
+  @action
+  setDrawingCoordSystem(value: CoordSystemTypes) {
+    this.drawingCoordSystem = value;
+  }
+
+  @action
+  setDrawingLineWidth(value: number) {
+    this.drawingLineWidth = value;
+    this.drawingLine?.setWidth(value);
   }
 }
 

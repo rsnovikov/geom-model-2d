@@ -2,7 +2,9 @@ import { FC } from "preact/compat";
 import { useRef, useEffect } from "preact/hooks";
 import { observer } from "mobx-react-lite";
 import { layoutModel } from "../models/layout.model";
-import { CoordsField } from "./coords-field";
+import { CartesianCoordsField } from "./cartesian-coords-field";
+import { PolarCoordsFields } from "./polar-coords-fields";
+import { CoordSystemTypes } from "../models/constants";
 
 /**
  * Layout
@@ -23,11 +25,20 @@ export const Layout: FC = observer(() => {
         layoutModel.appendTo(layoutWrapperRef.current);
       }
     })();
+
+    return () => {
+      layoutModel.destroy();
+    };
   }, []);
 
   return (
     <div className="w-full h-full relative" ref={layoutWrapperRef}>
-      {(layoutModel.isDrawing || layoutModel.drawingLine) && <CoordsField />}
+      {(layoutModel.isDrawing || layoutModel.drawingLine) &&
+        (layoutModel.drawingCoordSystem === CoordSystemTypes.POLAR ? (
+          <PolarCoordsFields />
+        ) : (
+          <CartesianCoordsField />
+        ))}
     </div>
   );
 });
