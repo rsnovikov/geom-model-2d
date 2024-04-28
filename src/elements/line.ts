@@ -48,9 +48,79 @@ export class Line {
         break;
       }
       case LineTypes.DOTTED: {
+        // Длина штриха и пробела в пикселях
+        const dashLength = 16;
+        const gapLength = 4;
+        const dx = this.x2 - this.x1;
+        const dy = this.y2 - this.y1;
+
+        const lineLength = Math.sqrt(dx ** 2 + dy ** 2);
+        const angle = Math.atan2(dy, dx);
+
+        let dashPosition = 0;
+        while (dashPosition < lineLength) {
+          const segmentStart = dashPosition;
+          dashPosition += dashLength;
+          const segmentEnd = Math.min(dashPosition, lineLength);
+
+          this.graphics.moveTo(
+            this.x1 + Math.cos(angle) * segmentStart,
+            this.y1 + Math.sin(angle) * segmentStart
+          );
+          this.graphics.lineTo(
+            this.x1 + Math.cos(angle) * segmentEnd,
+            this.y1 + Math.sin(angle) * segmentEnd
+          );
+
+          dashPosition += gapLength;
+        }
         break;
       }
       case LineTypes.STREAK_DOTTED: {
+        // Длина штриха, точки и промежутка в пикселях
+        const dashLength = 16;
+        const dotLength = 2;
+        const gapLength = 4;
+
+        const dx = this.x2 - this.x1;
+        const dy = this.y2 - this.y1;
+
+        const lineLength = Math.sqrt(dx ** 2 + dy ** 2);
+        const angle = Math.atan2(dy, dx);
+
+        let position = 0;
+        while (position < lineLength) {
+          const segmentStart = position;
+          position += dashLength;
+          const segmentEnd = Math.min(position, lineLength);
+
+          this.graphics.moveTo(
+            this.x1 + Math.cos(angle) * segmentStart,
+            this.y1 + Math.sin(angle) * segmentStart
+          );
+          this.graphics.lineTo(
+            this.x1 + Math.cos(angle) * segmentEnd,
+            this.y1 + Math.sin(angle) * segmentEnd
+          );
+
+          position += gapLength;
+
+          const dotStart = position;
+          position += dotLength;
+          const dotEnd = Math.min(position, lineLength);
+
+          this.graphics.moveTo(
+            this.x1 + Math.cos(angle) * dotStart,
+            this.y1 + Math.sin(angle) * dotStart
+          );
+          this.graphics.lineTo(
+            this.x1 + Math.cos(angle) * dotEnd,
+            this.y1 + Math.sin(angle) * dotEnd
+          );
+
+          position += gapLength;
+        }
+
         break;
       }
     }
