@@ -1,5 +1,5 @@
 import { Input, InputRef } from "antd";
-import { FC, JSX, useEffect, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { layoutModel } from "../models/layout.model";
 
